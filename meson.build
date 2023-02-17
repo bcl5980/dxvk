@@ -5,12 +5,9 @@ platform   = target_machine.system()
 
 cpp = meson.get_compiler('cpp')
 cc = meson.get_compiler('c')
-dxvk_is_msvc = cpp.get_id() == 'msvc'
+dxvk_is_msvc = cpp.get_id() == 'msvc' or cpp.get_id() == 'clang-cl'
 
 compiler_args = [
-  '-msse',
-  '-msse2',
-  '-msse3',
   '-mfpmath=sse',
   '-Wimplicit-fallthrough',
   # gcc
@@ -23,6 +20,7 @@ compiler_args = [
   '-Wno-extern-c-compat',
   '-Wno-unused-const-variable',
   '-Wno-missing-braces',
+  '-Wno-deprecated-declarations',
 ]
 
 link_args = []
@@ -41,6 +39,14 @@ dxvk_include_dirs = [
 
 proj_displayinfo = subproject('libdisplay-info')
 dep_displayinfo = proj_displayinfo.get_variable('di_dep')
+
+if cpu_family != 'aarch64'
+  compiler_args += [
+    '-msse',
+    '-msse2',
+    '-msse3',
+  ]
+endif
 
 if platform == 'windows'
   compiler_args += [
